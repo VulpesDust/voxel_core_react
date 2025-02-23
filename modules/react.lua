@@ -11,24 +11,14 @@ function react.draw(react_doc)
     local path = react_doc.path
     local doc = react_doc.doc
     local App = react_doc.App
-    doc.rroot:clear()
+    -- doc.root:clear()
 
-    local rx = App.rx()
-    local cc = App.children_components
-    if cc then
-        for k, v in pairs(cc) do
-            local start_pos, end_pos = string.find(rx, k)
-            if start_pos ~= nil then
-                local component = require(path .. '/components/' .. v)
-                rx = string.gsub(rx, '<'..k..'/>', component.rx())
-            end
-        end
-    end
+    local node_tree_root = ReactParser.parse(App, path)
+    -- print(node_tree_root)
+    node_tree_root:compute(doc.root.size)
 
-    -- print(rx)
-    if rx ~= '' then
-        doc.rroot:add(rx)
-    end
+
+    -- doc.root:add(rx)
 end
 
 -- path - path to components - путь до компонентов
