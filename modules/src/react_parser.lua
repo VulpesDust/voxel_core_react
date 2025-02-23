@@ -1,42 +1,6 @@
-local Node = {}
-Node.__index = Node
+local Node = require('src/domain/node')
 
-function Node:new(tag, attributes, children)
-    local node = {
-        tag = tag,
-        attributes = attributes or {},
-        children = children or {}
-    }
-    setmetatable(node, Node)
-    return node
-end
-
-function Node:__tostring()
-    local attrs = {}
-    for _, v in pairs(self.attributes) do
-        table.insert(attrs, string.format('%s="%s"', v[1], v[2]))
-    end
-
-    if not self.selfclose then
-        -- Преобразуем все дочерние элементы в строки
-        local children_str = {}
-        for _, child in ipairs(self.children) do
-            if type(child) == "table" then
-                table.insert(children_str, tostring(child)) -- Рекурсивно вызываем __tostring для узлов
-            else
-                -- table.insert(children_str, '\'start\'' .. child .. '\'end\'') -- Просто добавляем текст
-                table.insert(children_str, child) -- Просто добавляем текст
-            end
-        end
-
-        return string.format("<%s%s>%s</%s>", self.tag, #attrs > 0 and " " .. table.concat(attrs, " ") or "",
-            table.concat(children_str), self.tag)
-    else
-        return string.format("<%s%s/>", self.tag, #attrs > 0 and " " .. table.concat(attrs, " ") or "")
-    end
-end
-
-local function parse_html(html)
+local function parse_recursively(html)
     local stack = {}
     local root = Node:new("root")
     table.insert(stack, root)
@@ -70,16 +34,14 @@ local function parse_html(html)
                     while j < end_tag do -- html:sub(j, j) ~= ">" do
                         local attr_start, attr_end = html:find('(%w+)=?', j)
                         if html:sub(attr_end, attr_end) ~= '=' then
-                            -- node.attributes[html:sub(attr_start, attr_end)] = true
-                            table.insert(node.attributes, {html:sub(attr_start, attr_end), true})
+                            node.attributes[html:sub(attr_start, attr_end)] = true
                             j = attr_end + 1
                         end
 
                         local attr_start, attr_end = html:find('(%w+)="([^"]*)"', j)
                         if attr_start then
                             local name, value = html:sub(attr_start, attr_end):match('([%w-]+)%s*=%s*["\'](.-)["\']')
-                            table.insert(node.attributes, {name, value})
-                            -- node.attributes[name] = value
+                            node.attributes[name] = value
                             j = attr_end + 1
                         else
                             break
@@ -90,6 +52,7 @@ local function parse_html(html)
                 end
 
                 table.insert(stack[#stack].children, node)
+                node.parent = stack[#stack]
                 if not selfclose then
                     table.insert(stack, node)
                 end
@@ -116,8 +79,8 @@ end
 
 local ReactParser = {}
 
-function ReactParser.parse_xml(xml) return parse_html(xml) end
-
-function ReactParser.parse_app(App) return parse_html(App.get_xml()) end
+function ReactParser.parse(App, path)
+    return parse_recursively(App.get_xml(), path)
+end
 
 return ReactParser
