@@ -17,18 +17,23 @@ function Node:__tostring()
         table.insert(attrs, string.format('%s="%s"', v[1], v[2]))
     end
 
-    -- Преобразуем все дочерние элементы в строки
-    local children_str = {}
-    for _, child in ipairs(self.children) do
-        if type(child) == "table" then
-            table.insert(children_str, tostring(child)) -- Рекурсивно вызываем __tostring для узлов
-        else
-            table.insert(children_str, '\'start\'' .. child .. '\'end\'') -- Просто добавляем текст
+    if not self.selfclose then
+        -- Преобразуем все дочерние элементы в строки
+        local children_str = {}
+        for _, child in ipairs(self.children) do
+            if type(child) == "table" then
+                table.insert(children_str, tostring(child)) -- Рекурсивно вызываем __tostring для узлов
+            else
+                -- table.insert(children_str, '\'start\'' .. child .. '\'end\'') -- Просто добавляем текст
+                table.insert(children_str, child) -- Просто добавляем текст
+            end
         end
-    end
 
-    return string.format("<%s%s>%s</%s>", self.tag, #attrs > 0 and " " .. table.concat(attrs, " ") or "",
-        table.concat(children_str), self.tag)
+        return string.format("<%s%s>%s</%s>", self.tag, #attrs > 0 and " " .. table.concat(attrs, " ") or "",
+            table.concat(children_str), self.tag)
+    else
+        return string.format("<%s%s/>", self.tag, #attrs > 0 and " " .. table.concat(attrs, " ") or "")
+    end
 end
 
 local function parse_html(html)
@@ -48,15 +53,21 @@ local function parse_html(html)
                 end
                 i = j + 1
             else
-                -- Открывающий тег
+                -- Открывающий тег или самозакрывающийся тег
                 local j = html:find("[ >]", i)
                 local tag = html:sub(i + 1, j - 1)
+                local end_tag = html:find('>', j)
+                local selfclose = html:sub(end_tag - 1, end_tag) == '/>' -- Проверяем, является ли тег самозакрывающимся
+                if selfclose then
+                    tag = html:sub(i + 1, j - 2)
+                end
                 local node = Node:new(tag)
+                node.selfclose = selfclose
 
                 if html:sub(j, j) ~= '>' then
                     -- Парсинг атрибутов
-                    local max_j = html:find('>', j)
-                    while j < max_j do -- html:sub(j, j) ~= ">" do
+                    local end_tag = html:find('>', j)
+                    while j < end_tag do -- html:sub(j, j) ~= ">" do
                         local attr_start, attr_end = html:find('(%w+)=?', j)
                         if html:sub(attr_end, attr_end) ~= '=' then
                             -- node.attributes[html:sub(attr_start, attr_end)] = true
@@ -79,7 +90,9 @@ local function parse_html(html)
                 end
 
                 table.insert(stack[#stack].children, node)
-                table.insert(stack, node)
+                if not selfclose then
+                    table.insert(stack, node)
+                end
                 i = html:find(">", i) + 1
             end
         else
