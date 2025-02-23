@@ -1,7 +1,7 @@
 {
-    "id": "vcr_0_1_0",
+    "id": "vcr_0_2",
     "title": "VoxelCore React",
     "creator": "VulpesDust",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "API для более простого построение интерфейсов в стиле React"
 }

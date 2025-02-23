@@ -1,3 +1,7 @@
+local ReactParser = require('src/react_parser')
+
+-- require('test/test_react_parser')
+
 local react = {}
 
 --[[
@@ -46,15 +50,9 @@ function react.init(path, document, App)
         doc = document,
         App = App,
     }
-    react_doc.draw = function () react.draw(react_doc) end
+    react_doc.draw = function() react.draw(react_doc) end
     react.documents[path] = react_doc
     return react_doc
 end
-
-function react.version()
-    return 'v0.1.0'
-end
-
-react.v = react.version
 
 return react

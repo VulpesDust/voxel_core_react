@@ -19,7 +19,7 @@
 
 Создайте файл `layouts/layout_xml_file_name.xml.lua` для инициализации и отрисовки интерфейса:
 ```lua
-local react = require('vcr_0_1_0:react')
+local react = require('vcr_0_2:react')
 local App = require('mod_name:path_to_src/App')
 
 local inited = false
