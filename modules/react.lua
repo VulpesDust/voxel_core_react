@@ -4,14 +4,6 @@ require('test/test_react_parser')
 
 local react = {}
 
---[[
-    [path] = react_doc = {
-        path: string,
-        doc: document,
-        App: table,
-        draw: func,
-    }
-]]
 react.documents = {}
 
 --[[
