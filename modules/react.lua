@@ -1,6 +1,6 @@
 local ReactParser = require('src/react_parser')
 
--- require('test/test_react_parser')
+require('test/test_react_parser')
 
 local react = {}
 
