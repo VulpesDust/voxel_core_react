@@ -36,7 +36,7 @@ function AppTestAttributes.get_xml()
     ]]
 end
 
-local node_tree = ReactParser.parse_app(AppTestAttributes)
+local node_tree = ReactParser.parse(AppTestAttributes)
 
 if tostring(node_tree) == '<root><div disabled="true" class="header">Привет, мир!</div><div disabled="true" class="header">Привет, мир!</div><div class="header2" style="width: 100px; height: 100px">H2</div><div class="header2" style="width: 100px; height: 100px">H2</div><div>Это пример HTML-документа.</div><div><div>asdf</div><div>asdf2</div></div><div><div>asdf3</div><div>asdf4</div></div></root>' then
     print_test('TEST OK ' .. 'AppTestAttributes')
