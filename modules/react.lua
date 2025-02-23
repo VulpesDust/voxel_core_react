@@ -6,8 +6,6 @@ local react = {}
 
 react.documents = {}
 
---[[
-TODO переводит подобие react в дерево, а потом дерево в xml строку
 ]]
 function react.draw(react_doc)
     local path = react_doc.path
